@@ -1,1 +1,1 @@
-# Brainfuck for Nim [![Build Status](https://circleci.com/gh/zikolach/brainfuck.png)](https://circleci.com/gh/zikolach/brainfuck)
+# Brainfuck for Nim [![Circle CI](https://circleci.com/gh/zikolach/brainfuck.svg?style=svg)](https://circleci.com/gh/zikolach/brainfuck)
