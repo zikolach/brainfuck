@@ -6,5 +6,7 @@ description   = "A brainfuck interpreter"
 license       = "BSD"
 
 bin           = "brainfuck"
+srcDir        = "src"
+
 [Deps]
 Requires: "nim >= 0.10.0, docopt >= 0.1.0"
