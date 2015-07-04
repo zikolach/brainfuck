@@ -2,3 +2,4 @@ nimcache/
 *.swp
 brainfuck
 hello
+tests/all

@@ -8,6 +8,11 @@ proc xinc*(c: var char) {.inline.} = inc c
 proc xdec*(c: var char) {.inline.} = dec c
 {.pop.}
 
+proc readCharEOF*(input: Stream): char =
+    result = input.readChar
+    if result == '\0': # Streams return 0 for EOF
+        result = '\255'  # BF assumes EOF to be -1
+
 proc compile(code: string, input, output: string): NimNode {.compiletime.} =
     var stmts = @[newStmtList()]
     template addStmt(text): stmt =
@@ -51,16 +56,10 @@ macro compileFile*(filename: string; input, output: expr): stmt =
 macro compileString*(code: string): stmt =
     compile($code, "stdin.newFileStream", "stdout.newFileStream")
 
-macro compileStrng*(code: string; input, output: expr): stmt =
+macro compileString*(code: string; input, output: expr): stmt =
     result = compile($code, "newStringStream(" & $input & ")", "newStringStream()")
     result.add parseStmt($output & " = outStream.data")
 
-import streams
-
-proc readCharEOF*(input: Stream): char =
-    result = input.readChar
-    if result == '\0': # Streams return 0 for EOF
-        result = '\255'  # BF assumes EOF to be -1
 
 proc interpret*(code: string, input, output: Stream) =
     ## Interprets the brainfuck `code` string, reading from `input` and writing
@@ -139,7 +138,5 @@ Options:
     elif args["interpret"]:
         let code = if args["<file.b>"]: readFile($args["<file.b>"])
                    else: readAll(stdin)
-        var inpStream = newStringStream("Hello World!\n")
-        var outStream = newFileStream(stdout)
-        interpret(code, inpStream, outStream)
+        interpret(code)
 
