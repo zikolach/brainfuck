@@ -1,7 +1,7 @@
 dependencies:
   pre:
     - |
-        rm -rf ~/nim
+        #rm -rf ~/nim
         if [ ! -x ~/nim/bin/nim ]; then
           git clone git://github.com/nim-lang/Nim.git ~/nim/
           git clone --depth 1 git://github.com/nim-lang/csources ~/nim/csources/
