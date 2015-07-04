@@ -1,3 +1,38 @@
+import macros
+
+proc compile(code: string): NimNode {.compiletime.} =
+    var stmts = @[newStmtList()]
+    template addStmt(text): stmt =
+        stmts[stmts.high].add parseStmt(text)
+    addStmt "var tape: array[1_000_000, char]"
+    addStmt "var tapePos = 0"
+    for c in code:
+        case c
+        of '+': addStmt "xinc tape[tapePos]"
+        of '-': addStmt "xdec tape[tapePos]"
+        of '>': addStmt "inc tapePos"
+        of '<': addStmt "dec tapePos"
+        of '.': addStmt "stdout.write tape[tapePos]"
+        of ',': addStmt "tape[tapePos] = stdin.readChar"
+        of '[': stmts.add newStmtList()
+        of ']':
+            var loop = newNimNode(nnkWhileStmt)
+            loop.add parseExpr("tape[tapePos] != '\\0'")
+            loop.add stmts.pop
+            stmts[stmts.high].add loop
+        else: discard
+    result = stmts[0]
+    #echo result.repr
+
+macro compileString*(code: string): stmt =
+    ## Compiles the brainfuck `code` string into Nim code that reads from stdin
+    ## and writes to stdout.
+    compile code.strval
+
+macro compileFile*(filename: string): stmt =
+    ## Compiles the brainfuck code read from `filename` at compile time into Nim
+    ## code that reads from stdin and writes to stdout.
+    compile staticRead(filename.strval)
 
 {.push overflowchecks: off.}
 proc xinc(c: var char) = inc c
@@ -38,11 +73,30 @@ proc interpret*(code: string) =
     discard run()
 
 when isMainModule:
-    import os
-    echo "Welcome to Brainfuck"
+    import docopt, tables, strutils
 
-    let code = if paramCount() > 0: readFile paramStr(1)
-               else: readAll stdin
+    proc mandelbrot() = 
+        compileFile("examples/mandelbrot.b")
 
-    interpret code
+    let doc = """
+brainfuck
+
+Usage:
+    brainfuck mandelbrot
+    brainfuck interpret [<file.b>]
+    brainfuck (-h | --help)
+    brainfuck (-v | --version)
+
+Options:
+    -h --help     Show this screen.
+    -v --version  Show version.
+"""
+    let args = docopt(doc, version = "brainfuck 1.0")
+    if args["mandelbrot"]:
+        mandelbrot()
+
+    elif args["interpret"]:
+        let code = if args["<file.b>"]: readFile($args["<file.b>"])
+                   else: readAll(stdin)
+        interpret(code)
 
