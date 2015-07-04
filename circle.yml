@@ -19,4 +19,4 @@ dependencies:
 
 test:
   override:
-    - nim c -r tests/all
+    - ~/nim/bin/nim c -r tests/all
