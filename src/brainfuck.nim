@@ -1,5 +1,8 @@
 import macros, streams
 
+when not defined(nimnode):
+    type NimNode = PNimrodNode
+
 {.push overflowchecks: off.}
 proc xinc*(c: var char) {.inline.} = inc c
 proc xdec*(c: var char) {.inline.} = dec c
